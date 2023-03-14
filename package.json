@@ -5,6 +5,17 @@
   "repository": "git@github.com:yazaldefilimonepinto/sonic.io.git",
   "author": "Yazalde Filimone <yazaldefilimon@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "format": "prettier --ignore-path .gitignore \"src/**/*.+(ts|js)\" --write",
+    "postinstall": "husky install",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig-build.json",
+    "prepare": "husky install",
+    "lint": "tslint -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
   "dependencies": {
     "mathjs": "^11.6.0",
     "nodeplotlib": "^1.1.2"
@@ -12,6 +23,10 @@
   "devDependencies": {
     "@types/mathjs": "^9.4.2",
     "@types/node": "^18.15.3",
+    "husky": "^7.0.2",
+    "lint-staged": "^11.1.2",
+    "tsup": "^6.6.3",
+    "tsx": "^3.12.5",
     "typescript": "^4.9.5",
     "vite-tsconfig-paths": "^4.0.7",
     "vitest": "^0.29.2"
