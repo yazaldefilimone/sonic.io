@@ -21,6 +21,7 @@
     "nodeplotlib": "^1.1.2"
   },
   "devDependencies": {
+    "@types/jest": "^29.4.1",
     "@types/mathjs": "^9.4.2",
     "@types/node": "^18.15.3",
     "husky": "^7.0.2",
