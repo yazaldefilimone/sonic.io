@@ -11,3 +11,12 @@ export function encodeBits(input: string): string {
   }
   return bits;
 }
+
+export function decodeBits(bits: string): string {
+  const bytes = [];
+  for (let index = 0; index < bits.length; index += 8) {
+    bytes.push(parseInt(bits.slice(index, index + 8), 2));
+  }
+  const result = Buffer.from(bytes).toString('utf8');
+  return result;
+}
