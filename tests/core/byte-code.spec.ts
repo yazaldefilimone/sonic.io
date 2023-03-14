@@ -5,4 +5,11 @@ describe('Byte Code', () => {
     const data = 1 as unknown as string;
     expect(() => encodeBits(data)).toThrow('input is not a string');
   });
+
+  it('Should be transform data in bytes', () => {
+    const data = 'Hello';
+    const bits = encodeBits(data);
+    expect(bits).toContainEqual('1');
+    expect(bits).toContainEqual('0');
+  });
 });
