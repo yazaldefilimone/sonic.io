@@ -1,0 +1,4 @@
+{
+  "*.ts": ["npm run lint", "npm run test"],
+  "*.js": ["npm run lint", "npm run test"]
+}
