@@ -1,0 +1,9 @@
+{
+  "extends": ["tslint:recommended"],
+  "rules": {
+    "semicolon": false,
+    "quotemark": [true, "single"],
+    "max-line-length": [true, 120],
+    "no-console": true
+  }
+}
