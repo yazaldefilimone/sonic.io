@@ -1,0 +1,19 @@
+{
+  "name": "sonic.io",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:yazaldefilimonepinto/sonic.io.git",
+  "author": "Yazalde Filimone <yazaldefilimon@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mathjs": "^11.6.0",
+    "nodeplotlib": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/mathjs": "^9.4.2",
+    "@types/node": "^18.15.3",
+    "typescript": "^4.9.5",
+    "vite-tsconfig-paths": "^4.0.7",
+    "vitest": "^0.29.2"
+  }
+}
