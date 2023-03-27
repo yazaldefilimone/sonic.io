@@ -8,6 +8,7 @@
   "scripts": {
     "format": "prettier --ignore-path .gitignore \"src/**/*.+(ts|js)\" --write",
     "postinstall": "husky install",
+    "dev": "tsx ./src/core/sonic.ts",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig-build.json",
     "prepare": "husky install",
@@ -17,13 +18,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "mathjs": "^11.6.0",
-    "nodeplotlib": "^1.1.2"
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@types/jest": "^29.4.1",
-    "@types/mathjs": "^9.4.2",
     "@types/node": "^18.15.3",
+    "@types/ws": "^8.5.4",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "tsup": "^6.6.3",
