@@ -45,7 +45,7 @@ async function main() {
 
   const room = await sonicServer.to('room-1');
 
-  room.emit('message', 'Hello there!!');
+  await room.emit('message', 'Hello there!!');
 }
 
 main().catch((error) => {
