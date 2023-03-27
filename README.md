@@ -11,7 +11,7 @@ Sonic.io is a high-performance real-time communication framework that supports a
 client:
 
 ```ts
-import { CreateSonicClient } from '../src/core/sonic-client';
+import { CreateSonicClient } from 'sonic.io';
 
 const sonic = new CreateSonicClient('ws://localhost:3000');
 
@@ -23,6 +23,33 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
+});
+
+```
+
+
+
+server: 
+
+```ts
+
+import { createServer } from 'http';
+import { CreateSonicServer } from 'sonic.io';
+
+const httpServer = createServer();
+
+const sonicServer = new CreateSonicServer(httpServer);
+
+async function main() {
+  await sonicServer.emit('message', 'hello');
+
+  const room = await sonicServer.to('room-1');
+
+  room.emit('message', 'Hello there!!');
+}
+
+main().catch((error) => {
+  console.log(error);
 });
 
 ```
