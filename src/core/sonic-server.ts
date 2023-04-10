@@ -37,7 +37,7 @@ export class CreateSonicServer {
     }
   }
 
-  async to({ room, options }: toType): Promise<emitResponseType> {
+  async to(room: string, options?: optionType): Promise<emitResponseType> {
     const isCache = options.cache || false;
     const isStreams = options.streams || false;
 
