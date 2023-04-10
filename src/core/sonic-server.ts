@@ -1,17 +1,32 @@
 import http from 'http';
 import { Server as WebSocketServer } from 'ws';
 
-interface Socket {
-  send(data: any): void;
-}
+type socketType<T = any> = {
+  send(data: T): void;
+};
+
+type optionType = { streams?: boolean; cache?: boolean };
+
+type toType = {
+  room: string;
+  options?: optionType;
+};
+
+type emitFunctionType<T = any> = (event: string, data: T, options?: optionType) => Promise<void>;
+
+type emitResponseType = {
+  emit: emitFunctionType;
+};
 
 export class CreateSonicServer {
   private server: http.Server;
   private wsServer: WebSocketServer;
 
-  private sockets: Map<string, Socket> = new Map();
+  private sockets: Map<string, socketType> = new Map();
+  private cache: Map<string, any>;
 
   constructor(server: http.Server) {
+    this.cache = new Map();
     this.server = server;
     this.wsServer = new WebSocketServer({ server });
 
@@ -35,7 +50,7 @@ export class CreateSonicServer {
     }
   }
 
-  async to(room: string): Promise<{ emit: (event: string, data: any) => Promise<void> }> {
+  async to({ room, options }: toType): Promise<emitResponseType> {
     const socketsInRoom = [...this.sockets.entries()].filter(([socketId, socket]) => {
       return socketId.startsWith(`${room}#`);
     });
