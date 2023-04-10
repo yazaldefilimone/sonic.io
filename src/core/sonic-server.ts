@@ -1,22 +1,6 @@
-import http from 'http';
+import http from 'node:http';
 import { Server as WebSocketServer } from 'ws';
-
-type socketType<T = any> = {
-  send(data: T): void;
-};
-
-type optionType = { streams?: boolean; cache?: boolean };
-
-type toType = {
-  room: string;
-  options?: optionType;
-};
-
-type emitFunctionType<T = any> = (event: string, data: T, options?: optionType) => Promise<void>;
-
-type emitResponseType = {
-  emit: emitFunctionType;
-};
+import { emitResponseType, optionType, socketType, toType } from './type';
 
 export class CreateSonicServer {
   private server: http.Server;
@@ -44,19 +28,25 @@ export class CreateSonicServer {
     });
   }
 
-  async emit(event: string, data: any): Promise<void> {
+  async emit(event: string, data: any, options?: optionType): Promise<void> {
+    const isCache = options.cache || false;
+    const isStreams = options.streams || false;
+
     for (const socket of this.sockets.values()) {
       socket.send(JSON.stringify({ event, data }));
     }
   }
 
   async to({ room, options }: toType): Promise<emitResponseType> {
+    const isCache = options.cache || false;
+    const isStreams = options.streams || false;
+
     const socketsInRoom = [...this.sockets.entries()].filter(([socketId, socket]) => {
       return socketId.startsWith(`${room}#`);
     });
 
     return {
-      emit: async (event: string, data: any): Promise<void> => {
+      emit: async (event: string, data: any, options): Promise<void> => {
         for (const [socketId, socket] of socketsInRoom) {
           socket.send(JSON.stringify({ event, data }));
         }
