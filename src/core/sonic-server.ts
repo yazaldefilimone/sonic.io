@@ -1,17 +1,21 @@
 import http from 'node:http';
 import { Server as WebSocketServer } from 'ws';
-import { emitResponseType, optionType, socketType, toType } from './type';
+import { Readable } from 'stream';
+
+import { emitResponseType, optionType, socketType, dataType } from './type';
 
 export class CreateSonicServer {
   private server: http.Server;
   private wsServer: WebSocketServer;
-
   private sockets: Map<string, socketType> = new Map();
-  private cache: Map<string, any>;
+  private options: { inteligencie: boolean };
 
-  constructor(server: http.Server) {
-    this.cache = new Map();
+  constructor(server: http.Server, options?: { inteligencie?: boolean }) {
     this.server = server;
+    this.options = {
+      inteligencie: options?.inteligencie === undefined ?? false,
+    };
+
     this.wsServer = new WebSocketServer({ server });
 
     this.wsServer.on('connection', (socket, request) => {
@@ -28,29 +32,45 @@ export class CreateSonicServer {
     });
   }
 
-  async emit(event: string, data: any, options?: optionType): Promise<void> {
-    const isCache = options.cache || false;
-    const isStreams = options.streams || false;
-
-    for (const socket of this.sockets.values()) {
-      socket.send(JSON.stringify({ event, data }));
+  async emit(event: string, data: dataType, options?: optionType): Promise<void> {
+    const isCache = options?.cache ?? false;
+    const isStreams = options?.streams ?? false;
+    const socketsInSystem = [...this.sockets.entries()];
+    if (isStreams && data instanceof Readable) {
+      this.transporterStream(socketsInSystem, data);
+    } else {
+      for (const [socketId, socket] of socketsInSystem) {
+        socket.send(JSON.stringify({ event, data }));
+      }
     }
   }
 
   async to(room: string, options?: optionType): Promise<emitResponseType> {
-    const isCache = options.cache || false;
-    const isStreams = options.streams || false;
+    const isCache = options?.cache ?? false;
+    const isStreams = options?.streams ?? false;
 
     const socketsInRoom = [...this.sockets.entries()].filter(([socketId, socket]) => {
       return socketId.startsWith(`${room}#`);
     });
 
     return {
-      emit: async (event: string, data: any, options): Promise<void> => {
-        for (const [socketId, socket] of socketsInRoom) {
-          socket.send(JSON.stringify({ event, data }));
+      emit: async (event: string, data: dataType, options): Promise<void> => {
+        if (isStreams && data instanceof Readable) {
+          this.transporterStream(socketsInRoom, data);
+        } else {
+          for (const [socketId, socket] of socketsInRoom) {
+            socket.send(JSON.stringify({ event, data }));
+          }
         }
       },
     };
+  }
+
+  private async transporterStream(socketsInRoom: [string, socketType][], data: Readable): Promise<void> {
+    for (const [socketId, socket] of socketsInRoom) {
+      for await (const chunk of data) {
+        socket.send(chunk);
+      }
+    }
   }
 }

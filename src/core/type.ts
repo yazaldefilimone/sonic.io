@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 export type socketType<T = string> = {
   send(data: T): void;
 };
@@ -14,3 +16,5 @@ export type emitFunctionType<T = any> = (event: string, data: T, options?: optio
 export type emitResponseType = {
   emit: emitFunctionType;
 };
+
+export type dataType = string | ArrayBuffer | Buffer | Blob | Readable;

@@ -8,9 +8,9 @@ const sonicServer = new CreateSonicServer(httpServer);
 async function main() {
   await sonicServer.emit('message', 'hello');
 
-  const room = await sonicServer.to('room-1');
+  const room = await sonicServer.to('room-1', { cache: true });
 
-  room.emit('message', 'Hello there!!');
+  room.emit('message', 'Hello there!!', { streams: true });
 }
 
 main().catch((error) => {
