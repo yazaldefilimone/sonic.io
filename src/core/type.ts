@@ -1,8 +1,7 @@
 import { Readable } from 'node:stream';
+import { Server as WebSocketServer, WebSocket } from 'ws';
 
-export type socketType<T = string> = {
-  send(data: T): void;
-};
+export type socketType<T = string> = WebSocket;
 
 export type optionType = { streams?: boolean; cache?: boolean };
 

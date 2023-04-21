@@ -1,13 +1,13 @@
 import http from 'node:http';
 import { Server as WebSocketServer } from 'ws';
 import { Readable } from 'stream';
-
 import { emitResponseType, optionType, socketType, dataType } from './type';
 
 export class CreateSonicServer {
   private server: http.Server;
   private wsServer: WebSocketServer;
   private sockets: Map<string, socketType> = new Map();
+  private cacheMessage: Map<string, any> = new Map();
   private options: { inteligencie: boolean };
 
   constructor(server: http.Server, options?: { inteligencie?: boolean }) {
@@ -17,16 +17,19 @@ export class CreateSonicServer {
     };
 
     this.wsServer = new WebSocketServer({ server });
-
     this.wsServer.on('connection', (socket, request) => {
       const socketId = request.headers['sec-websocket-key'] as string;
       this.sockets.set(socketId, socket);
-
+      const cached = [...this.cacheMessage.entries()];
+      for (const [event, data] of cached) {
+        socket.send(JSON.stringify({ event, data }));
+      }
       socket.on('message', (data: string) => {
         console.log(`Message received from ${socketId}: ${data}`);
       });
 
       socket.on('close', () => {
+        console.log('close');
         this.sockets.delete(socketId);
       });
     });
@@ -36,12 +39,9 @@ export class CreateSonicServer {
     const isCache = options?.cache ?? false;
     const isStreams = options?.streams ?? false;
     const socketsInSystem = [...this.sockets.entries()];
-    if (isStreams && data instanceof Readable) {
-      this.transporterStream(socketsInSystem, data);
-    } else {
-      for (const [socketId, socket] of socketsInSystem) {
-        socket.send(JSON.stringify({ event, data }));
-      }
+    this.cacheMessage.set(event, data);
+    for (const [socketId, socket] of socketsInSystem) {
+      socket.send(JSON.stringify({ event, data }));
     }
   }
 
@@ -59,7 +59,7 @@ export class CreateSonicServer {
           this.transporterStream(socketsInRoom, data);
         } else {
           for (const [socketId, socket] of socketsInRoom) {
-            socket.send(JSON.stringify({ event, data }));
+            socket.send(JSON.stringify({ data, event }));
           }
         }
       },
