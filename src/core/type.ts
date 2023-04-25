@@ -10,10 +10,15 @@ export type toType = {
   options?: optionType;
 };
 
-export type emitFunctionType<T = any> = (event: string, data: T, options?: optionType) => Promise<void>;
+export type emitFunctionType<T = any> = (data: T, options?: optionType) => Promise<void>;
+export type onFunctionType<T = any> = (options?: optionType) => Promise<T>;
 
 export type emitResponseType = {
   emit: emitFunctionType;
+};
+export type emitResponseClientType = {
+  emit: emitFunctionType;
+  on: onFunctionType;
 };
 
 export type dataType = string | ArrayBuffer | Buffer | Blob | Readable;

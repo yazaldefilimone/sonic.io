@@ -4,9 +4,11 @@ const sonic = new CreateSonicClient('ws://localhost:3000');
 
 async function main() {
   await sonic.connect();
-  const res = await sonic.on('this');
-  console.log({ res });
-  await sonic.emit('error', 'hello error');
+  const error = await sonic.on('error');
+  console.log({ error });
+  const erro = await sonic.to('this');
+  const messages = await erro.on();
+  console.log({ messages });
 }
 
 main().catch((error) => {

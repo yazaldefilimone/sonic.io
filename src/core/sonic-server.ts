@@ -22,6 +22,7 @@ export class CreateSonicServer {
       this.sockets.set(socketId, socket);
       const cached = [...this.cacheMessage.entries()];
       for (const [event, data] of cached) {
+        console.log({ event, data });
         socket.send(JSON.stringify({ event, data }));
       }
       socket.on('message', (data: string) => {
@@ -30,6 +31,8 @@ export class CreateSonicServer {
 
       socket.on('close', () => {
         console.log('close');
+        const m = this.cacheMessage.values();
+        console.log(m);
         this.sockets.delete(socketId);
       });
     });
@@ -54,12 +57,13 @@ export class CreateSonicServer {
     });
 
     return {
-      emit: async (event: string, data: dataType, options): Promise<void> => {
+      emit: async (data: dataType, options): Promise<void> => {
         if (isStreams && data instanceof Readable) {
           this.transporterStream(socketsInRoom, data);
         } else {
+          this.cacheMessage.set(room, data);
           for (const [socketId, socket] of socketsInRoom) {
-            socket.send(JSON.stringify({ data, event }));
+            socket.send(JSON.stringify({ room, event: '', data }));
           }
         }
       },

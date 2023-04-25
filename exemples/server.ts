@@ -2,11 +2,14 @@ import { createServer } from 'node:http';
 import { CreateSonicServer } from '../src/core/sonic-server';
 
 const httpServer = createServer();
-const sonicServer = new CreateSonicServer(httpServer);
+const sonicServer = new CreateSonicServer(httpServer, { inteligencie: true });
 
 async function main() {
-  console.log('hei');
   await sonicServer.emit('error', 'Hello, Messages!');
-  await sonicServer.emit('this', 'Hello, This!');
+  const room = await sonicServer.to('this');
+  await room.emit('Hello, This!');
+  await room.emit('message cached ');
 }
-httpServer.listen('3000', main);
+main().then();
+
+httpServer.listen('3000', () => {});

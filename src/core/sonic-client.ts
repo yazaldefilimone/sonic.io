@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { optionType } from './type';
+import { dataType, emitResponseClientType, emitResponseType, optionType } from './type';
 
 export class CreateSonicClient {
   private sonic: WebSocket | null = null;
@@ -21,7 +21,7 @@ export class CreateSonicClient {
     this.isOpen();
     const isCache = options?.cache ?? false;
     const isStreams = options?.streams ?? false;
-    this.sonic.send(JSON.stringify({ event, data }));
+    this.sonic.send(JSON.stringify({ data, event }));
   }
 
   async on(event: string, options?: optionType): Promise<string> {
@@ -29,12 +29,10 @@ export class CreateSonicClient {
     const isCache = options?.cache ?? false;
     const isStreams = options?.streams ?? false;
     return new Promise<string>((resolve, reject) => {
-      this.sonic.on(event, (args) => {
-        const message = JSON.parse(args.toString());
-        if (message.data) {
-          resolve(message.data);
-        }
-        resolve('');
+      this.sonic.on('message', (data) => {
+        console.log({ data });
+        const message = JSON.parse(data.toString());
+        resolve(message);
       });
       this.sonic.addEventListener('error', (error) => {
         reject(error);
@@ -42,12 +40,26 @@ export class CreateSonicClient {
     });
   }
 
-  async to(event: string, data: any, options?: optionType): Promise<void> {
+  async to(room: string, options?: optionType): Promise<emitResponseClientType> {
     this.isOpen();
     const isCache = options?.cache ?? false;
     const isStreams = options?.streams ?? false;
-
-    this.sonic.send(JSON.stringify({ event, data }), this.error);
+    return {
+      emit: async (data: dataType, options): Promise<void> => {
+        this.sonic.send(JSON.stringify({ room, event: '', data }));
+      },
+      on: async () => {
+        return new Promise<string>((resolve, reject) => {
+          this.sonic.on('message', (data) => {
+            const message = JSON.parse(data.toString());
+            resolve(message);
+          });
+          this.sonic.addEventListener('error', (error) => {
+            reject(error);
+          });
+        });
+      },
+    };
   }
 
   isOpen() {
@@ -55,7 +67,6 @@ export class CreateSonicClient {
       throw new Error('WebSonic is not open');
     }
   }
-
   error = (err?: Error) => {
     throw err ? err : Error('sonic: error');
   };
