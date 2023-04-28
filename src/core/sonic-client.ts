@@ -30,9 +30,12 @@ export class CreateSonicClient {
     const isStreams = options?.streams ?? false;
     return new Promise<string>((resolve, reject) => {
       this.sonic.on('message', (data) => {
-        console.log({ data });
         const message = JSON.parse(data.toString());
-        resolve(message);
+        if (message) {
+          resolve(message);
+        } else {
+          resolve('');
+        }
       });
       this.sonic.addEventListener('error', (error) => {
         reject(error);

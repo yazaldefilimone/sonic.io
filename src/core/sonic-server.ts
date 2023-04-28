@@ -3,11 +3,16 @@ import { Server as WebSocketServer } from 'ws';
 import { Readable } from 'stream';
 import { emitResponseType, optionType, socketType, dataType } from './type';
 
+type new_connection = {
+  id: string;
+};
 export class CreateSonicServer {
   private server: http.Server;
   private wsServer: WebSocketServer;
   private sockets: Map<string, socketType> = new Map();
   private cacheMessage: Map<string, any> = new Map();
+  private currentConnected: string | null;
+  private currentDisConnected: string | null;
   private options: { inteligencie: boolean };
 
   constructor(server: http.Server, options?: { inteligencie?: boolean }) {
@@ -20,20 +25,15 @@ export class CreateSonicServer {
     this.wsServer.on('connection', (socket, request) => {
       const socketId = request.headers['sec-websocket-key'] as string;
       this.sockets.set(socketId, socket);
+      this.currentConnected = socketId;
       const cached = [...this.cacheMessage.entries()];
       for (const [event, data] of cached) {
         console.log({ event, data });
         socket.send(JSON.stringify({ event, data }));
       }
-      socket.on('message', (data: string) => {
-        console.log(`Message received from ${socketId}: ${data}`);
-      });
-
       socket.on('close', () => {
-        console.log('close');
-        const m = this.cacheMessage.values();
-        console.log(m);
         this.sockets.delete(socketId);
+        this.currentDisConnected = socketId;
       });
     });
   }
@@ -63,7 +63,7 @@ export class CreateSonicServer {
         } else {
           this.cacheMessage.set(room, data);
           for (const [socketId, socket] of socketsInRoom) {
-            socket.send(JSON.stringify({ room, event: '', data }));
+            socket.send(JSON.stringify({ event: room, data }));
           }
         }
       },
@@ -76,5 +76,33 @@ export class CreateSonicServer {
         socket.send(chunk);
       }
     }
+  }
+
+  private connected(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      this.wsServer.on('connection', (_, request) => {
+        const socketId = request.headers['sec-websocket-key'] as string;
+        resolve(socketId);
+      });
+
+      this.error(reject);
+    });
+  }
+
+  private disconnected(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      if (this.currentConnected) {
+        resolve(this.currentConnected);
+        this.currentConnected = null;
+      }
+
+      this.error(reject);
+    });
+  }
+
+  private error(reject: (reason?: any) => void) {
+    this.wsServer.on('error', (error) => {
+      reject(error);
+    });
   }
 }
